@@ -12,6 +12,9 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth, database } from "@/lib/Firebase"
+import { ref, serverTimestamp, set } from "firebase/database"
 
 const formSchema = z
   .object({
@@ -46,11 +49,28 @@ export default function SignupPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // Add your signup logic here
-    console.log(values)
-    setIsLoading(false)
-    router.push("/auth/login")
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password)
+      const user = userCredential.user
+
+      await set(ref(database, `users/${user.uid}`), {
+        id: user.uid,
+        fullName: values.fullName,
+        email: values.email,
+        role: "SUPER_ADMIN",
+        createdAt: serverTimestamp(),
+      })
+
+      console.log("User signed up and stored in database:", user.uid)
+      router.push("/auth/login")
+    } catch (error: any) {
+      console.error("Signup error:", error.message)
+    } finally {
+      setIsLoading(false)
+    }
   }
+
 
   return (
     <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">

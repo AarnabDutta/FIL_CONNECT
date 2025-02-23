@@ -13,6 +13,9 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ForgotPasswordDialog } from "@/components/auth/forgot-password-dialog"
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth, database } from "@/lib/Firebase"
+
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -33,11 +36,17 @@ export default function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    // Add your login logic here
-    await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate API call
-    setIsLoading(false)
-    router.push("/dashboard")
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      console.log("Login successful");
+      router.push("/dashboard");
+
+    } catch (error: any) {
+      console.error("Login failed:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
