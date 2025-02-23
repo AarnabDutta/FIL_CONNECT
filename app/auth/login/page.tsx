@@ -19,6 +19,7 @@ import signup from "@/public/signup.jpg"
 import Image from "next/image"
 
 import logo  from "@/public/logo.png"
+import { toast } from "sonner"
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
@@ -41,10 +42,12 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast.success("Login successful");
       console.log("Login successful");
       router.push("/dashboard");
 
     } catch (error: any) {
+      toast.error("Login successful");
       console.error("Login failed:", error.message);
     } finally {
       setIsLoading(false);
@@ -64,11 +67,11 @@ export default function LoginPage() {
           />
           <div className="relative z-20 flex flex-col h-full p-12">
             <div className="flex items-center gap-2">
-              <Image src={logo} width={140} height={40} alt="Logo" className=" rounded" />
+              <Image src={logo} width={200} height={70} alt="Logo" className=" rounded" />
               {/* <h1 className="text-2xl font-bold text-white">FILxCONNECT</h1> */}
             </div>
             <div
-              className="relative z-20 mt-20 ml-10"
+              className="relative z-20 mt-20 flex justify-center"
             >
               <Image src={signup} alt="signup" width={500} height={500} className="rounded-lg" />
 

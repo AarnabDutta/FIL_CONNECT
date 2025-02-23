@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/providers/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
+import { Toaster } from "@/components/ui/sonner"
 export default function RootLayout({
   children,
 }: {
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Toaster/>
           {children}
         </ThemeProvider>
       </body>

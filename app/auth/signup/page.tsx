@@ -16,7 +16,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth"
 import { auth, database } from "@/lib/Firebase"
 import { ref, serverTimestamp, set } from "firebase/database"
 import signup from "@/public/signup.jpg"
-import logo  from "@/public/logo.png"
+import logo from "@/public/logo.png"
+import { toast } from "sonner"
 const formSchema = z
   .object({
     fullName: z.string().min(2, "Name must be at least 2 characters"),
@@ -62,10 +63,11 @@ export default function SignupPage() {
         role: "SUPER_ADMIN",
         createdAt: serverTimestamp(),
       })
-
+      toast.success("Signed up Successfully");
       console.log("User signed up and stored in database:", user.uid)
       router.push("/auth/login")
     } catch (error: any) {
+      toast.error("Signup error:", error.message);
       console.error("Signup error:", error.message)
     } finally {
       setIsLoading(false)
@@ -79,7 +81,7 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary to-primary-foreground" />
         <div className="relative z-20 flex items-center gap-2">
           <motion.div initial="hidden" animate="visible" variants={fadeIn} transition={{ duration: 0.5 }}>
-            <Image src={logo} alt="Logo" width={140} height={40} className="rounded-lg" />
+            <Image src={logo} alt="Logo" width={200} height={70} className="rounded-lg" />
           </motion.div>
           {/* <motion.h1
             className="text-2xl font-bold"
@@ -92,7 +94,7 @@ export default function SignupPage() {
           </motion.h1> */}
         </div>
         <motion.div
-          className="relative z-20 mt-20 ml-10"
+          className="relative z-20 mt-20 flex justify-center"
           initial="hidden"
           animate="visible"
           variants={fadeIn}
