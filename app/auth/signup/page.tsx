@@ -12,7 +12,11 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth, database } from "@/lib/Firebase"
+import { ref, serverTimestamp, set } from "firebase/database"
+import signup from "@/public/signup.jpg"
+import logo  from "@/public/logo.png"
 const formSchema = z
   .object({
     fullName: z.string().min(2, "Name must be at least 2 characters"),
@@ -46,11 +50,28 @@ export default function SignupPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // Add your signup logic here
-    console.log(values)
-    setIsLoading(false)
-    router.push("/auth/login")
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password)
+      const user = userCredential.user
+
+      await set(ref(database, `users/${user.uid}`), {
+        id: user.uid,
+        fullName: values.fullName,
+        email: values.email,
+        role: "SUPER_ADMIN",
+        createdAt: serverTimestamp(),
+      })
+
+      console.log("User signed up and stored in database:", user.uid)
+      router.push("/auth/login")
+    } catch (error: any) {
+      console.error("Signup error:", error.message)
+    } finally {
+      setIsLoading(false)
+    }
   }
+
 
   return (
     <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -58,9 +79,9 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary to-primary-foreground" />
         <div className="relative z-20 flex items-center gap-2">
           <motion.div initial="hidden" animate="visible" variants={fadeIn} transition={{ duration: 0.5 }}>
-            <Image src="/placeholder.svg?height=40&width=40" alt="Logo" width={40} height={40} className="rounded-lg" />
+            <Image src={logo} alt="Logo" width={140} height={40} className="rounded-lg" />
           </motion.div>
-          <motion.h1
+          {/* <motion.h1
             className="text-2xl font-bold"
             initial="hidden"
             animate="visible"
@@ -68,21 +89,19 @@ export default function SignupPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             FILxCONNECT
-          </motion.h1>
+          </motion.h1> */}
         </div>
         <motion.div
-          className="relative z-20 mt-auto"
+          className="relative z-20 mt-20 ml-10"
           initial="hidden"
           animate="visible"
           variants={fadeIn}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <blockquote className="space-y-2">
-            <p className="text-lg">
-              "Manage your social platform with ease and efficiency. Welcome to the admin dashboard."
-            </p>
-            <footer className="text-sm">Sofia Davis</footer>
-          </blockquote>
+          <motion.div initial="hidden" animate="visible" variants={fadeIn} transition={{ duration: 0.5 }}>
+            <Image src={signup} alt="signup" width={500} height={500} className="rounded-lg" />
+          </motion.div>
+
         </motion.div>
       </div>
       <div className="lg:p-8">

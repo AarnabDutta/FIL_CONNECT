@@ -13,7 +13,12 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ForgotPasswordDialog } from "@/components/auth/forgot-password-dialog"
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth, database } from "@/lib/Firebase"
+import signup from "@/public/signup.jpg"
+import Image from "next/image"
 
+import logo  from "@/public/logo.png"
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
@@ -33,11 +38,17 @@ export default function LoginPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    // Add your login logic here
-    await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate API call
-    setIsLoading(false)
-    router.push("/dashboard")
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      console.log("Login successful");
+      router.push("/dashboard");
+
+    } catch (error: any) {
+      console.error("Login failed:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -53,16 +64,14 @@ export default function LoginPage() {
           />
           <div className="relative z-20 flex flex-col h-full p-12">
             <div className="flex items-center gap-2">
-              <img src="/placeholder.svg?height=40&width=40" alt="Logo" className="w-10 h-10 rounded" />
-              <h1 className="text-2xl font-bold text-white">FILxCONNECT</h1>
+              <Image src={logo} width={140} height={40} alt="Logo" className=" rounded" />
+              {/* <h1 className="text-2xl font-bold text-white">FILxCONNECT</h1> */}
             </div>
-            <div className="mt-auto">
-              <blockquote className="space-y-2">
-                <p className="text-lg text-white/90">
-                  "Manage your social platform with ease and efficiency. Welcome to the admin dashboard."
-                </p>
-                <footer className="text-sm text-white/70">Admin Portal</footer>
-              </blockquote>
+            <div
+              className="relative z-20 mt-20 ml-10"
+            >
+              <Image src={signup} alt="signup" width={500} height={500} className="rounded-lg" />
+
             </div>
           </div>
         </div>
