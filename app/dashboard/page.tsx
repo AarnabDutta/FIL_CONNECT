@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Activity, Users, FileText, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,39 @@ import { Layout } from "@/components/layout";
 const MotionDiv = dynamic(() => import("framer-motion").then((mod) => mod.motion.div), { ssr: false });
 
 export default function DashboardPage() {
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [activeUsers, setActiveUsers] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [totalResponse, activeResponse] = await Promise.all([
+          fetch('http://localhost:2002/api/users/total'),
+          fetch('http://localhost:2002/api/users/total/active')
+        ]);
+
+        if (!totalResponse.ok || !activeResponse.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        const [totalData, activeData] = await Promise.all([
+          totalResponse.json(),
+          activeResponse.json()
+        ]);
+
+        setTotalUsers(totalData);
+        setActiveUsers(activeData);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <Layout>
       <div className="relative">
@@ -22,8 +56,45 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">1,234</div>
-                <p className="text-xs text-green-600 dark:text-green-400">+20.1% from last month</p>
+                <div className="text-2xl font-bold">
+                  {isLoading ? (
+                    <div className="h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  ) : (
+                    totalUsers
+                  )}
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  {isLoading ? (
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  ) : (
+                    "+20.1% from last month"
+                  )}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="transform transition-all duration-200 hover:scale-105 hover:shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                <div className="rounded-full bg-green-100 p-2 dark:bg-green-900">
+                  <Activity className="h-4 w-4 text-green-600 dark:text-green-300" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {isLoading ? (
+                    <div className="h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  ) : (
+                    activeUsers
+                  )}
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  {isLoading ? (
+                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  ) : (
+                    `${((activeUsers / totalUsers) * 100).toFixed(1)}% of total users`
+                  )}
+                </p>
               </CardContent>
             </Card>
 
