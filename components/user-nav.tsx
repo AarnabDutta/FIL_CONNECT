@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LogOut, User, Settings, Bell } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { auth } from "@/lib/Firebase" // Ensure Firebase is correctly set up
+import { auth, database } from "@/lib/Firebase" // Ensure Firebase is correctly set up
 import { onAuthStateChanged, signOut } from "firebase/auth"
+import { ref, onValue } from "firebase/database"
 
 import {
   DropdownMenu,
@@ -34,9 +35,14 @@ export function UserNav() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        setUser({
-          name: currentUser.displayName || "Admin User",
-          email: currentUser.email || "admin@filxconnect.com",
+        // Get additional user data from Realtime Database
+        const userRef = ref(database, `users/${currentUser.uid}`)
+        onValue(userRef, (snapshot) => {
+          const userData = snapshot.val()
+          setUser({
+            name: userData?.fullName || currentUser.displayName || "Admin User",
+            email: currentUser.email || "admin@filxconnect.com",
+          })
         })
       } else {
         setUser({ name: "Guest", email: "" })
