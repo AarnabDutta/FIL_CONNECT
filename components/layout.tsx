@@ -16,22 +16,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       {/* Sidebar */}
-      <motion.div
-        className="fixed inset-y-0 left-0 w-64 border-r bg-background"
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="flex h-16 items-center justify-center border-b px-6">
-          <motion.h1
-            className="text-xl font-bold"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+      <div className="fixed inset-y-0 left-0 w-64 bg-background">
+        <div className="flex h-16 items-center justify-center px-6">
+          <h1 className="text-xl font-bold select-none">
             FILxCONNECT
-          </motion.h1>
+          </h1>
         </div>
         <motion.div
           className="p-6"
@@ -41,16 +30,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         >
           <MainNav />
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Main content */}
       <div className="pl-64">
-        <motion.header
-          className="sticky top-0 z-50 border-b bg-background"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <header className="sticky top-0 z-50 bg-background">
           <div className="flex h-16 items-center justify-between px-6">
             <h2 className="text-lg font-semibold">Admin Dashboard</h2>
             <div className="flex items-center gap-4">
@@ -58,7 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <UserNav />
             </div>
           </div>
-        </motion.header>
+        </header>
         <motion.main
           className="p-6"
           initial={{ opacity: 0, y: 20 }}
