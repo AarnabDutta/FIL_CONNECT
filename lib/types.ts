@@ -12,7 +12,7 @@ export type Post = {
   userId: string
   title: string
   content: string
-  status: "pending" | "approved" | "rejected"
+  status: "0" | "1" | "3"
   createdAt: Date
   author: {
     username: string

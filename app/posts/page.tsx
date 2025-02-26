@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -21,34 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Layout } from "@/components/layout"
 import type { Post } from "@/lib/types"
-
-// Mock data
-const posts: Post[] = [
-  {
-    id: "1",
-    userId: "user1",
-    title: "First Post",
-    content: "This is a test post",
-    status: "pending",
-    createdAt: new Date(),
-    author: {
-      username: "johndoe",
-      email: "john@example.com",
-    },
-  },
-  {
-    id: "2",
-    userId: "user2",
-    title: "Approved Post",
-    content: "This is an approved post",
-    status: "approved",
-    createdAt: new Date(),
-    author: {
-      username: "janedoe",
-      email: "jane@example.com",
-    },
-  },
-]
+import { apiRequest } from "../apiconnector/api"
 
 const columns: ColumnDef<Post>[] = [
   {
@@ -63,7 +36,7 @@ const columns: ColumnDef<Post>[] = [
     },
   },
   {
-    accessorKey: "author.username",
+    accessorKey: "user.username",
     header: "Author",
   },
   {
@@ -73,9 +46,8 @@ const columns: ColumnDef<Post>[] = [
       const status = row.getValue("status") as string
       return (
         <div
-          className={`font-medium ${
-            status === "approved" ? "text-green-600" : status === "rejected" ? "text-red-600" : "text-yellow-600"
-          }`}
+          className={`font-medium ${status === "approved" ? "text-green-600" : status === "rejected" ? "text-red-600" : "text-yellow-600"
+            }`}
         >
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </div>
@@ -83,19 +55,24 @@ const columns: ColumnDef<Post>[] = [
     },
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "user.createdAt",
     header: "Created",
-    cell: ({ row }) => {
-      return new Date(row.getValue("createdAt")).toLocaleDateString()
-    },
+    // cell: ({ row }) => {
+    //   return new Date(row.getValue("createdAt")).toLocaleDateString()
+    // },
   },
   {
     id: "actions",
     cell: ({ row }) => {
       const post = row.original
 
-      const handleApprove = () => {
+      const handleApprove = async () => {
+
         // Add approve logic here
+        const res = await apiRequest(`posts/approvePost/${post.id}`, "PUT");
+
+        console.log(res);
+
         console.log("Approve post:", post.id)
       }
 
@@ -106,7 +83,7 @@ const columns: ColumnDef<Post>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          {post.status === "pending" && (
+          {post.status === "3" && (
             <>
               <Button variant="ghost" size="icon" onClick={handleApprove} className="h-8 w-8 text-green-600">
                 <Check className="h-4 w-4" />
@@ -137,14 +114,34 @@ export default function PostsPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [activeTab, setActiveTab] = useState("pending")
+  const [posts, setPosts] = useState<Post[]>([]);
 
-  const filteredPosts = posts.filter((post) => {
-    if (activeTab === "all") return true
-    return post.status === activeTab
-  })
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const res = await apiRequest("posts", "GET");
+      console.log(res);
+
+      let filteredPosts = res;
+
+      if (activeTab === "pending") {
+        filteredPosts = res.filter((post: Post) => post.status === "3");
+      } else if (activeTab === "approved") {
+        filteredPosts = res.filter((post: Post) => post.status === "1");
+      } else if (activeTab === "rejected") {
+        filteredPosts = res.filter((post: Post) => post.status === "0");
+      }
+
+      setPosts(filteredPosts);
+    };
+
+    fetchPosts();
+  }, [activeTab]); // Depend on activeTab to refetch data
+
+
+
 
   const table = useReactTable({
-    data: filteredPosts,
+    data: posts,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

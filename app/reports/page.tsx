@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Layout } from "@/components/layout"
 import type { Report } from "@/lib/types"
+import { apiRequest } from "../apiconnector/api"
 
 // Mock data
 const reports: Report[] = [
@@ -59,18 +60,18 @@ const columns: ColumnDef<Report>[] = [
   {
     accessorKey: "targetType",
     header: "Type",
-    cell: ({ row }) => {
-      const type = row.getValue("targetType") as string
-      return type.charAt(0).toUpperCase() + type.slice(1)
-    },
+    // cell: ({ row }) => {
+    //   const type = row.getValue("targetType") as string
+    //   return type.charAt(0).toUpperCase() + type.slice(1)
+    // },
   },
   {
     accessorKey: "target",
     header: "Target",
-    cell: ({ row }) => {
-      const report = row.original
-      return report.targetType === "user" ? report.target.username : report.target.title
-    },
+    // cell: ({ row }) => {
+    //   const report = row.original
+    //   return report.targetType === "user" ? report.target.username : report.target.title
+    // },
   },
   {
     accessorKey: "reason",
@@ -81,20 +82,19 @@ const columns: ColumnDef<Report>[] = [
     header: "Reported By",
   },
   {
-    accessorKey: "status",
+    accessorKey: "reportStatus",
     header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string
-      return (
-        <div
-          className={`font-medium ${
-            status === "resolved" ? "text-green-600" : status === "dismissed" ? "text-red-600" : "text-yellow-600"
-          }`}
-        >
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </div>
-      )
-    },
+    // cell: ({ row }) => {
+    //   const status = row.getValue("status") as string
+    //   return (
+    //     <div
+    //       className={`font-medium ${status === "resolved" ? "text-green-600" : status === "dismissed" ? "text-red-600" : "text-yellow-600"
+    //         }`}
+    //     >
+    //       {status.charAt(0).toUpperCase() + status.slice(1)}
+    //     </div>
+    //   )
+    // },
   },
   {
     id: "actions",
@@ -144,6 +144,20 @@ const columns: ColumnDef<Report>[] = [
 export default function ReportsPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [reports, setReports] = useState<Report[]>([])
+  useEffect(() => {
+    const getAllTheReports = async () => {
+      try {
+        const res = await apiRequest("reports", "GET")
+        console.log(res);
+        setReports(res || [])
+      } catch (error) {
+        console.error("Failed to fetch reports:", error)
+      }
+    }
+
+    getAllTheReports();
+  }, [])
 
   const table = useReactTable({
     data: reports,
@@ -195,6 +209,7 @@ export default function ReportsPage() {
                       <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                     ))}
                   </TableRow>
+                  
                 ))
               ) : (
                 <TableRow>

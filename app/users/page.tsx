@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -19,44 +19,25 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Layout } from "@/components/layout"
+import { apiRequest } from "../apiconnector/api"
 
 type User = {
   id: string
   username: string
   email: string
-  status: "active" | "blocked"
+  status: 0 | 1 | 2  // Changed status to numerical values
   reports: number
 }
-
-const data: User[] = [
-  {
-    id: "1",
-    username: "johndoe",
-    email: "john@example.com",
-    status: "active",
-    reports: 0,
-  },
-  {
-    id: "2",
-    username: "janedoe",
-    email: "jane@example.com",
-    status: "active",
-    reports: 2,
-  },
-  // Add more mock data as needed
-]
 
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "username",
-    header: ({ column }) => {
-      return (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Username
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        Username
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
   },
   {
     accessorKey: "email",
@@ -66,12 +47,11 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string
-      return (
-        <div className={`font-medium ${status === "active" ? "text-green-600" : "text-red-600"}`}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </div>
-      )
+      const status = row.getValue("status") as number
+      const statusText = status === 0 ? "Rejected" : status === 1 ? "Active" : "Pending"
+      const statusColor = status === 0 ? "text-red-600" : status === 1 ? "text-green-600" : "text-yellow-600"
+
+      return <div className={`font-medium ${statusColor}`}>{statusText}</div>
     },
   },
   {
@@ -81,7 +61,20 @@ export const columns: ColumnDef<User>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const user = row.original
+      const userId = row.original.id
+      console.log("User ID:", userId)
+
+      const handleBlockUser = async () => {
+        console.log("HELELL");
+        try {
+          const res = await apiRequest(`users/rejectUser/${userId}`, "PUT")
+          console.log(res);
+
+        } catch (error) {
+          console.error("Failed to block user:", error)
+        }
+      }
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -91,7 +84,9 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>View Details</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Block User</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleBlockUser} className="text-red-600">
+              Block User
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -102,20 +97,30 @@ export const columns: ColumnDef<User>[] = [
 export default function UsersPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [users, setUsers] = useState<User[]>([])
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await apiRequest("users", "GET")
+        setUsers(res || [])
+      } catch (error) {
+        console.error("Failed to fetch users:", error)
+      }
+    }
+    fetchUsers()
+  }, [])
 
   const table = useReactTable({
-    data,
+    data: users,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnFilters,
-    },
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
   })
 
   return (
@@ -134,18 +139,16 @@ export default function UsersPage() {
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
@@ -164,12 +167,7 @@ export default function UsersPage() {
           </Table>
         </div>
         <div className="flex items-center justify-end space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
+          <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
             Previous
           </Button>
           <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
@@ -180,4 +178,3 @@ export default function UsersPage() {
     </Layout>
   )
 }
-

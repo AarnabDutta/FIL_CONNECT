@@ -18,6 +18,7 @@ import { ref, serverTimestamp, set } from "firebase/database"
 import signup from "@/public/signup.jpg"
 import logo from "@/public/logo.png"
 import { toast } from "sonner"
+import { apiRequest } from "../../apiconnector/api"
 const formSchema = z
   .object({
     fullName: z.string().min(2, "Name must be at least 2 characters"),
@@ -50,27 +51,50 @@ export default function SignupPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password)
-      const user = userCredential.user
+      // Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
 
+      // Store user in Firebase Database
       await set(ref(database, `users/${user.uid}`), {
         id: user.uid,
         fullName: values.fullName,
         email: values.email,
         role: "SUPER_ADMIN",
         createdAt: serverTimestamp(),
-      })
-      toast.success("Signed up Successfully");
-      console.log("User signed up and stored in database:", user.uid)
-      router.push("/auth/login")
+      });
+
+      // Save admin details to backend (Spring Boot API)
+      const saveAdminToDB = {
+        aname: values.fullName,
+        aemail: values.email,
+        apass: values.password,
+        aprofilepic: "https://firebasestorage.googleapis.com/v0/b/filxconnect.appspot.com/o/profile%2Fdefault.png?alt=media",
+      };
+
+      // const res = await apiRequest("admins", "POST", saveAdminToDB);
+      // const res=await fetch("http://localhost:2002/api/admins", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(saveAdminToDB),
+      // });
+      const res = await apiRequest("admins", "POST", saveAdminToDB);
+
+      console.log("Admin created in backend:", res);
+
+      toast.success("Admin signed up successfully!");
+      router.push("/auth/login");
+
     } catch (error: any) {
-      toast.error("Signup error:", error.message);
-      console.error("Signup error:", error.message)
+      toast.error("Signup error: " + error.message);
+      console.error("Signup error:", error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
