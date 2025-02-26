@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, Users, FileText, AlertTriangle } from "lucide-react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 const navItems = [
@@ -28,25 +29,51 @@ const navItems = [
   },
 ]
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, x: -20 },
+  show: { opacity: 1, x: 0 }
+}
+
 export function MainNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-col gap-2">
-      {navItems.map((item) => (
-        <Button
-          key={item.href}
-          asChild
-          variant={pathname === item.href ? "default" : "ghost"}
-          className="w-full justify-start gap-2 transition-colors duration-200 ease-in-out hover:bg-accent"
+    <motion.nav 
+      className="flex flex-col gap-2"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {navItems.map((navItem, index) => (
+        <motion.div
+          key={navItem.href}
+          variants={item}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <Link href={item.href}>
-            <item.icon className="h-4 w-4" />
-            {item.title}
-          </Link>
-        </Button>
+          <Button
+            asChild
+            variant={pathname === navItem.href ? "default" : "ghost"}
+            className="w-full justify-start gap-2 transition-colors duration-200 ease-in-out hover:bg-accent"
+          >
+            <Link href={navItem.href}>
+              <navItem.icon className="h-4 w-4" />
+              {navItem.title}
+            </Link>
+          </Button>
+        </motion.div>
       ))}
-    </nav>
+    </motion.nav>
   )
 }
 
