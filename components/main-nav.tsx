@@ -64,10 +64,10 @@ export function MainNav() {
           <Button
             asChild
             variant={pathname === navItem.href ? "default" : "ghost"}
-            className="w-full justify-start gap-2 transition-colors duration-200 ease-in-out hover:bg-accent"
+            className="w-full justify-start gap-3 transition-colors duration-200 ease-in-out hover:bg-accent text-base font-medium"
           >
-            <Link href={navItem.href}>
-              <navItem.icon className="h-4 w-4" />
+            <Link href={navItem.href} className="flex items-center">
+              <navItem.icon className="h-5 w-5 mr-2" />
               {navItem.title}
             </Link>
           </Button>

@@ -23,7 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         variants={fadeIn}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex h-16 items-center border-b px-6">
+        <div className="flex h-16 items-center justify-center border-b px-6">
           <motion.h1
             className="text-xl font-bold"
             initial={{ opacity: 0, x: -20 }}

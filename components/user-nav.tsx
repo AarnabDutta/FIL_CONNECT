@@ -81,16 +81,20 @@ export function UserNav() {
         </motion.div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-80" align="end" forceMount>
+      <DropdownMenuContent 
+        className="w-80 bg-white/90 dark:bg-gray-950/90 backdrop-blur-sm border border-gray-200/20 dark:border-gray-800/20" 
+        align="end" 
+        forceMount
+      >
         <AnimatePresence>
           <motion.div {...dropdownAnimation}>
             <div className="flex items-center gap-4 p-4">
               <motion.div 
-                className="flex-shrink-0 h-14 w-14 rounded-full overflow-hidden border-2 border-primary/20"
+                className="flex-shrink-0 h-14 w-14 rounded-full overflow-hidden border-2 border-primary/20 bg-white dark:bg-gray-950"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <div className="flex h-full w-full items-center justify-center bg-muted">
+                <div className="flex h-full w-full items-center justify-center">
                   <User className="h-7 w-7" />
                 </div>
               </motion.div>
@@ -109,25 +113,6 @@ export function UserNav() {
             </div>
           </motion.div>
 
-          <DropdownMenuSeparator />
-
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <DropdownMenuItem className="cursor-pointer focus:bg-accent/50 p-3">
-              <Settings className="mr-3 h-4 w-4 text-gray-500" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer focus:bg-accent/50 p-3">
-              <Bell className="mr-3 h-4 w-4 text-blue-500" />
-              <span>Notifications</span>
-            </DropdownMenuItem>
-          </motion.div>
-
-          <DropdownMenuSeparator />
-
           <motion.div 
             whileHover={{ scale: 1.02 }} 
             whileTap={{ scale: 0.98 }}
@@ -135,7 +120,7 @@ export function UserNav() {
           >
             <DropdownMenuItem
               onClick={handleSignOut}
-              className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600 p-3"
+              className="cursor-pointer text-red-600 hover:text-red-700 focus:bg-red-50/50 focus:text-red-600 p-3"
             >
               <LogOut className="mr-3 h-4 w-4" />
               <span>Sign Out</span>
