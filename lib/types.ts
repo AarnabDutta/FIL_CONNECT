@@ -23,9 +23,12 @@ export type Post = {
 export type Report = {
   status: string
   id: string
-  targetType: "user" | "post"
+  targetType: "user" | "post" | string
   targetId: string
   reporterId: string
+  reportedUserId: string
+  reporterUserId: string
+  reportedPostId: string
   reason: string
   reportStatus: "PENDING" | "WARNING_1" | "WARNING_2" | "WARNING_3" | "BLOCKED" | "DISMISSED"
   createdAt: Date

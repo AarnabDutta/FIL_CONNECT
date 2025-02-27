@@ -65,7 +65,7 @@ export const columns: ColumnDef<User>[] = [
       console.log("User ID:", userId)
 
       const handleBlockUser = async () => {
-        console.log("HELELL");
+
         try {
           const res = await apiRequest(`users/rejectUser/${userId}`, "PUT")
           console.log(res);
@@ -74,6 +74,20 @@ export const columns: ColumnDef<User>[] = [
           console.error("Failed to block user:", error)
         }
       }
+      const handleApproveUser = async () => {
+
+        try {
+          const res = await apiRequest(`users/approveUser/${userId}`, "PUT")
+          console.log(res);
+
+        } catch (error) {
+          console.error("Failed to block user:", error)
+        }
+      }
+      useEffect(() => {
+        handleBlockUser();
+        handleBlockUser();
+      }, [])
 
       return (
         <DropdownMenu>
@@ -84,7 +98,7 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>View Details</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleBlockUser} className="text-green-600">
+            <DropdownMenuItem onClick={handleApproveUser} className="text-green-600">
               Approve User
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleBlockUser} className="text-red-600">
@@ -102,17 +116,94 @@ export default function UsersPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [users, setUsers] = useState<User[]>([])
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await apiRequest("users", "GET")
-        setUsers(res || [])
-      } catch (error) {
-        console.error("Failed to fetch users:", error)
-      }
+
+  const fetchUsers = async () => {
+    try {
+      const res = await apiRequest("users", "GET")
+      setUsers(res || [])
+    } catch (error) {
+      console.error("Failed to fetch users:", error)
     }
+  }
+
+  useEffect(() => {
     fetchUsers()
   }, [])
+
+  // Column Definitions with Updated Action Functions
+  const columns: ColumnDef<User>[] = [
+    {
+      accessorKey: "username",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Username
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as number
+        const statusText = status === 0 ? "Blocked" : status === 1 ? "Active" : "Pending"
+        const statusColor = status === 0 ? "text-red-600" : status === 1 ? "text-green-600" : "text-yellow-600"
+
+        return <div className={`font-medium ${statusColor}`}>{statusText}</div>
+      },
+    },
+    {
+      accessorKey: "reports",
+      header: "Reports",
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const userId = row.original.id
+
+        const handleBlockUser = async () => {
+          try {
+            await apiRequest(`users/rejectUser/${userId}`, "PUT")
+            fetchUsers() // Refresh user list after blocking
+          } catch (error) {
+            console.error("Failed to block user:", error)
+          }
+        }
+
+        const handleApproveUser = async () => {
+          try {
+            await apiRequest(`users/approveUser/${userId}`, "PUT")
+            fetchUsers()
+          } catch (error) {
+            console.error("Failed to approve user:", error)
+          }
+        }
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>View Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleApproveUser} className="text-green-600">
+                Approve User
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleBlockUser} className="text-red-600">
+                Block User
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
 
   const table = useReactTable({
     data: users,
