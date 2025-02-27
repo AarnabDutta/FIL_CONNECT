@@ -82,19 +82,32 @@ const columns: ColumnDef<Report>[] = [
     header: "Reported By",
   },
   {
-    accessorKey: "reportStatus",
+    accessorKey: "status",
     header: "Status",
-    // cell: ({ row }) => {
-    //   const status = row.getValue("status") as string
-    //   return (
-    //     <div
-    //       className={`font-medium ${status === "resolved" ? "text-green-600" : status === "dismissed" ? "text-red-600" : "text-yellow-600"
-    //         }`}
-    //     >
-    //       {status.charAt(0).toUpperCase() + status.slice(1)}
-    //     </div>
-    //   )
-    // },
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string | undefined
+
+      if (!status) return <div className="text-gray-400">No status</div>
+
+      const getStatusColor = (status: string) => {
+        switch (status.toLowerCase()) {
+          case "resolved":
+            return "text-green-600"
+          case "dismissed":
+            return "text-red-600"
+          case "pending":
+            return "text-yellow-600"
+          default:
+            return "text-gray-600"
+        }
+      }
+
+      return (
+        <div className={`font-medium ${getStatusColor(status)}`}>
+          {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+        </div>
+      )
+    },
   },
   {
     id: "actions",

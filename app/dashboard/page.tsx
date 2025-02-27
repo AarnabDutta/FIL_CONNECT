@@ -1,52 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Activity, Users, FileText, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Layout } from "@/components/layout";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 const MotionDiv = dynamic(() => import("framer-motion").then((mod) => mod.motion.div), { ssr: false });
 
 export default function DashboardPage() {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [activeUsers, setActiveUsers] = useState<number>(0);
+  const [activePosts, setActivePosts] = useState<number>(0);
+  const [reportedUsers, setReportedUsers] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [totalResponse, activeResponse] = await Promise.all([
-          fetch('http://localhost:2002/api/users/total'),
-          fetch('http://localhost:2002/api/users/total/active')
-        ]);
+  const fetchData = useCallback(async () => {
+    try {
+      const [totalResponse, activeUsersResponse, activePostsResponse, reportedUsersResponse] = await Promise.all([
+        fetch('http://localhost:2002/api/users/total'),
+        fetch('http://localhost:2002/api/users/total/active'),
+        fetch('http://localhost:2002/api/posts/total/active'),
+        fetch('http://localhost:2002/api/reports/total/users')
+      ]);
 
-        if (!totalResponse.ok || !activeResponse.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-
-        const [totalData, activeData] = await Promise.all([
-          totalResponse.json(),
-          activeResponse.json()
-        ]);
-
-        setTotalUsers(totalData);
-        setActiveUsers(activeData);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setIsLoading(false);
+      if (!totalResponse.ok || !activeUsersResponse.ok || !activePostsResponse.ok || !reportedUsersResponse.ok) {
+        throw new Error('Failed to fetch data');
       }
-    };
 
-    fetchData();
+      const [totalData, activeUsersData, activePostsData, reportedUsersData] = await Promise.all([
+        totalResponse.json(),
+        activeUsersResponse.json(),
+        activePostsResponse.json(),
+        reportedUsersResponse.json()
+      ]);
+
+      setTotalUsers(totalData);
+      setActiveUsers(activeUsersData);
+      setActivePosts(activePostsData);
+      setReportedUsers(reportedUsersData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  // Use the auto-refresh hook (refreshes every 30 seconds)
+  useAutoRefresh(fetchData);
 
   return (
     <Layout>
       <div className="relative">
         <div className="space-y-6">
-          {/* Stats Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card className="transform transition-all duration-200 hover:scale-105 hover:shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -56,20 +63,19 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {isLoading ? (
-                    <div className="h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                  ) : (
-                    totalUsers
-                  )}
-                </div>
-                <p className="text-xs text-green-600 dark:text-green-400">
-                  {isLoading ? (
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                  ) : (
-                    "+20.1% from last month"
-                  )}
-                </p>
+                {isLoading ? (
+                  <>
+                    <span className="block h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    <span className="mt-1 block h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{totalUsers}</div>
+                    <span className="text-xs text-green-600 dark:text-green-400">
+                      +20.1% from last month
+                    </span>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -81,20 +87,19 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {isLoading ? (
-                    <div className="h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                  ) : (
-                    activeUsers
-                  )}
-                </div>
-                <p className="text-xs text-green-600 dark:text-green-400">
-                  {isLoading ? (
-                    <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                  ) : (
-                    `${((activeUsers / totalUsers) * 100).toFixed(1)}% of total users`
-                  )}
-                </p>
+                {isLoading ? (
+                  <>
+                    <span className="block h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    <span className="mt-1 block h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{activeUsers}</div>
+                    <span className="text-xs text-green-600 dark:text-green-400">
+                      {`${((activeUsers / totalUsers) * 100).toFixed(1)}% of total users`}
+                    </span>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -106,8 +111,19 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">456</div>
-                <p className="text-xs text-green-600 dark:text-green-400">+12.5% from last month</p>
+                {isLoading ? (
+                  <>
+                    <span className="block h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    <span className="mt-1 block h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{activePosts}</div>
+                    <span className="text-xs text-purple-600 dark:text-purple-400">
+                      Active posts
+                    </span>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -119,11 +135,23 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">23</div>
-                <p className="text-xs text-amber-600 dark:text-amber-400">+7.2% from last month</p>
+                {isLoading ? (
+                  <>
+                    <span className="block h-8 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    <span className="mt-1 block h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{reportedUsers}</div>
+                    <span className="text-xs text-amber-600 dark:text-amber-400">
+                      {`${((reportedUsers / totalUsers) * 100).toFixed(1)}% of total users`}
+                    </span>
+                  </>
+                )}
               </CardContent>
             </Card>
 
+            {/* Commented out Active Now card
             <Card className="transform transition-all duration-200 hover:scale-105 hover:shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Now</CardTitle>
@@ -136,6 +164,8 @@ export default function DashboardPage() {
                 <p className="text-xs text-green-600 dark:text-green-400">+201 since last hour</p>
               </CardContent>
             </Card>
+            */}
+
           </div>
 
           {/* Recent Activity and Quick Stats */}

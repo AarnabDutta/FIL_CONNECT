@@ -84,6 +84,9 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>View Details</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleBlockUser} className="text-green-600">
+              Approve User
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleBlockUser} className="text-red-600">
               Block User
             </DropdownMenuItem>

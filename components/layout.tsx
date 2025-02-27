@@ -1,11 +1,13 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 
 import { motion } from "framer-motion"
 import { MainNav } from "@/components/main-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserNav } from "@/components/user-nav"
+import { RefreshIndicator } from "@/components/refresh-indicator"
 
 const fadeIn = {
   hidden: { opacity: 0 },
@@ -17,7 +19,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 w-64 bg-background">
-        <div className="flex h-16 items-center justify-center px-6">
+        <div className="flex h-16 items-center justify-center px-6 gap-3">
+          <Image
+            src="/new logo.png"
+            alt="FILxCONNECT Logo"
+            width={50}
+            height={50}
+            className="object-contain"
+          />
           <h1 className="text-xl font-bold select-none">
             FILxCONNECT
           </h1>
@@ -52,6 +61,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </motion.main>
       </div>
+      <RefreshIndicator />
     </div>
   )
 }

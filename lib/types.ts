@@ -21,12 +21,13 @@ export type Post = {
 }
 
 export type Report = {
+  status: string
   id: string
-  targetType: "post" | "comment" | "user"
+  targetType: "user" | "post"
   targetId: string
   reporterId: string
   reason: string
-  status: "pending" | "resolved" | "dismissed"
+  reportStatus: "PENDING" | "WARNING_1" | "WARNING_2" | "WARNING_3" | "BLOCKED" | "DISMISSED"
   createdAt: Date
   reporter: {
     username: string
