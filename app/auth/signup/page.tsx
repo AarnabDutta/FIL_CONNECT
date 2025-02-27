@@ -16,7 +16,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth"
 import { auth, database } from "@/lib/Firebase"
 import { ref, serverTimestamp, set } from "firebase/database"
 import signup from "@/public/signup.jpg"
-import logo from "@/public/logo.png"
+import logo from "@/public/new logo.png"
 import { toast } from "sonner"
 import { apiRequest } from "../../apiconnector/api"
 const formSchema = z
@@ -105,17 +105,17 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary to-primary-foreground" />
         <div className="relative z-20 flex items-center gap-2">
           <motion.div initial="hidden" animate="visible" variants={fadeIn} transition={{ duration: 0.5 }}>
-            <Image src={logo} alt="Logo" width={200} height={70} className="rounded-lg" />
+            <Image src={logo} alt="Logo" width={50} height={20} className="rounded-lg" />
           </motion.div>
-          {/* <motion.h1
-            className="text-2xl font-bold"
+          <motion.h1
+            className="text-2xl font-bold text-white"
             initial="hidden"
             animate="visible"
             variants={fadeIn}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             FILxCONNECT
-          </motion.h1> */}
+          </motion.h1>
         </div>
         <motion.div
           className="relative z-20 mt-20 flex justify-center"

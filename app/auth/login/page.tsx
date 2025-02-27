@@ -18,7 +18,6 @@ import { auth, database } from "@/lib/Firebase"
 import signup from "@/public/signup.jpg"
 import Image from "next/image"
 
-import logo  from "@/public/logo.png"
 import { toast } from "sonner"
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -67,8 +66,8 @@ export default function LoginPage() {
           />
           <div className="relative z-20 flex flex-col h-full p-12">
             <div className="flex items-center gap-2">
-              <Image src={logo} width={200} height={70} alt="Logo" className=" rounded" />
-              {/* <h1 className="text-2xl font-bold text-white">FILxCONNECT</h1> */}
+              <Image src={'/new logo.png'} width={50} height={20} alt="Logo" className="rounded" />
+              <h1 className="text-2xl font-bold text-white">FILxCONNECT</h1>
             </div>
             <div
               className="relative z-20 mt-20 flex justify-center"

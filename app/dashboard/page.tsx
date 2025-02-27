@@ -210,7 +210,7 @@ export default function DashboardPage() {
                 <CardContent className="space-y-4">
                   {[
                     { label: "Total Posts", value: "2,345" },
-                    { label: "Active Users Today", value: "1,234" },
+                    { label: "Active Users ", value: "1,234" },
                     { label: "Pending Reports", value: "15" },
                   ].map((stat, i) => (
                     <div
