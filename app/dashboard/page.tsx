@@ -14,32 +14,39 @@ export default function DashboardPage() {
   const [activeUsers, setActiveUsers] = useState<number>(0);
   const [activePosts, setActivePosts] = useState<number>(0);
   const [reportedUsers, setReportedUsers] = useState<number>(0);
+  const [totalPosts, setTotalPosts] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
-      const [totalResponse, activeUsersResponse, activePostsResponse, reportedUsersResponse] = await Promise.all([
+      const [totalResponse, activeUsersResponse, activePostsResponse, reportedUsersResponse, totalPostsResponse] = 
+      await Promise.all([
         fetch('http://localhost:2002/api/users/total'),
         fetch('http://localhost:2002/api/users/total/active'),
         fetch('http://localhost:2002/api/posts/total/active'),
-        fetch('http://localhost:2002/api/reports/total/users')
+        fetch('http://localhost:2002/api/reports/total/users'),
+        fetch('http://localhost:2002/api/posts') // Add this new endpoint
       ]);
 
-      if (!totalResponse.ok || !activeUsersResponse.ok || !activePostsResponse.ok || !reportedUsersResponse.ok) {
+      if (!totalResponse.ok || !activeUsersResponse.ok || !activePostsResponse.ok || 
+          !reportedUsersResponse.ok || !totalPostsResponse.ok) {
         throw new Error('Failed to fetch data');
       }
 
-      const [totalData, activeUsersData, activePostsData, reportedUsersData] = await Promise.all([
+      const [totalData, activeUsersData, activePostsData, reportedUsersData, totalPostsData] = 
+      await Promise.all([
         totalResponse.json(),
         activeUsersResponse.json(),
         activePostsResponse.json(),
-        reportedUsersResponse.json()
+        reportedUsersResponse.json(),
+        totalPostsResponse.json()
       ]);
 
       setTotalUsers(totalData);
       setActiveUsers(activeUsersData);
       setActivePosts(activePostsData);
       setReportedUsers(reportedUsersData);
+      setTotalPosts(totalPostsData.length); // Set total posts count
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -209,9 +216,9 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: "Total Posts", value: "2,345" },
-                    { label: "Active Users ", value: "1,234" },
-                    { label: "Pending Reports", value: "15" },
+                    { label: "Total Posts", value: isLoading ? "..." : totalPosts.toString() },
+                    { label: "Active Users", value: isLoading ? "..." : activeUsers.toString() },
+                    // { label: "Pending Reports", value: isLoading ? "..." : reportedUsers.toString() },
                   ].map((stat, i) => (
                     <div
                       key={i}
