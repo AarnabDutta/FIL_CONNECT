@@ -8,6 +8,8 @@ import { MainNav } from "@/components/main-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserNav } from "@/components/user-nav"
 import { RefreshIndicator } from "@/components/refresh-indicator"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 const fadeIn = {
   hidden: { opacity: 0 },
@@ -15,6 +17,8 @@ const fadeIn = {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen">
       {/* Sidebar */}
@@ -47,6 +51,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex h-16 items-center justify-between px-6">
             <h2 className="text-lg font-semibold">Admin Dashboard</h2>
             <div className="flex items-center gap-4">
+              <Button 
+                variant="outline"
+                onClick={() => router.push("/auth/signup")}
+                className="flex items-center gap-2"
+              >
+                Add Admin
+              </Button>
               <ThemeToggle />
               <UserNav />
             </div>
