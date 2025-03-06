@@ -39,21 +39,21 @@ const columns: ColumnDef<Post>[] = [
     accessorKey: "user.username",
     header: "Author",
   },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string
-      return (
-        <div
-          className={`font-medium ${status === "approved" ? "text-green-600" : status === "rejected" ? "text-red-600" : "text-yellow-600"
-            }`}
-        >
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </div>
-      )
-    },
-  },
+  // {
+  //   accessorKey: "status",
+  //   header: "Status",
+  //   cell: ({ row }) => {
+  //     const status = row.getValue("status") as string
+  //     return (
+  //       <div
+  //         className={`font-medium ${status === "approved" ? "text-green-600" : status === "rejected" ? "text-red-600" : "text-yellow-600"
+  //           }`}
+  //       >
+  //         {status.charAt(0).toUpperCase() + status.slice(1)}
+  //       </div>
+  //     )
+  //   },
+  // },
   {
     accessorKey: "user.createdAt",
     header: "Created",
@@ -63,6 +63,7 @@ const columns: ColumnDef<Post>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => {
       const post = row.original
 

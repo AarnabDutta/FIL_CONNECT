@@ -78,9 +78,9 @@ export default function DashboardPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold">{totalUsers}</div>
-                    <span className="text-xs text-green-600 dark:text-green-400">
+                    {/* <span className="text-xs text-green-600 dark:text-green-400">
                       +20.1% from last month
-                    </span>
+                    </span> */}
                   </>
                 )}
               </CardContent>

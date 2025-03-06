@@ -16,7 +16,7 @@ export function RefreshIndicator() {
       >
         <RefreshCw className="h-3 w-3" />
       </motion.div>
-      Auto-refreshing
+      
     </motion.div>
   )
 }

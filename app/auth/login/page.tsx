@@ -156,9 +156,9 @@ export default function LoginPage() {
                     >
                       Forgot your password?
                     </Button>
-                    <Link href="/auth/signup" className="text-sm text-muted-foreground hover:text-primary">
+                    {/* <Link href="/auth/signup" className="text-sm text-muted-foreground hover:text-primary">
                       Don&apos;t have an account? Sign up
-                    </Link>
+                    </Link> */}
                   </div>
                 </motion.div>
               </form>
