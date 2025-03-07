@@ -21,12 +21,13 @@ export default function DashboardPage() {
     try {
       const [totalResponse, activeUsersResponse, activePostsResponse, reportedUsersResponse, totalPostsResponse] = 
       await Promise.all([
-        fetch('http://localhost:2002/api/users/total'),
-        fetch('http://localhost:2002/api/users/total/active'),
-        fetch('http://localhost:2002/api/posts/total/active'),
-        fetch('http://localhost:2002/api/reports/total/users'),
-        fetch('http://localhost:2002/api/posts') // Add this new endpoint
+        fetch('http://52.66.205.31:8080/api/users/total'),
+        fetch('http://52.66.205.31:8080/api/users/total/active'),
+        fetch('http://52.66.205.31:8080/api/posts/total/active'),
+        fetch('http://52.66.205.31:8080/api/reports/total/users'),
+        fetch('http://52.66.205.31:8080/api/posts') // Add this new endpoint
       ]);
+
 
       if (!totalResponse.ok || !activeUsersResponse.ok || !activePostsResponse.ok || 
           !reportedUsersResponse.ok || !totalPostsResponse.ok) {
