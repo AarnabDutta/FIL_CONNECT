@@ -18,6 +18,7 @@ export type Post = {
     username: string
     email: string
   }
+  mediaUrls: string
 }
 
 export type Report = {

@@ -22,38 +22,40 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Layout } from "@/components/layout"
 import type { Post } from "@/lib/types"
 import { apiRequest } from "../apiconnector/api"
+import { PostDetailsDialog } from "@/components/post-details-dialog"
 
 export default function PostsPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [activeTab, setActiveTab] = useState("pending")
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>([])
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
 
   // Function to fetch posts based on active tab
   const fetchPosts = async () => {
     try {
-      const res = await apiRequest("posts", "GET");
-      console.log(res);
+      const res = await apiRequest("posts", "GET")
+      console.log(res)
 
-      let filteredPosts = res;
+      let filteredPosts = res
 
       if (activeTab === "pending") {
-        filteredPosts = res.filter((post: Post) => post.status === "3");
+        filteredPosts = res.filter((post: Post) => post.status === "3")
       } else if (activeTab === "approved") {
-        filteredPosts = res.filter((post: Post) => post.status === "1");
+        filteredPosts = res.filter((post: Post) => post.status === "1")
       } else if (activeTab === "rejected") {
-        filteredPosts = res.filter((post: Post) => post.status === "0");
+        filteredPosts = res.filter((post: Post) => post.status === "0")
       }
 
-      setPosts(filteredPosts);
+      setPosts(filteredPosts)
     } catch (error) {
-      console.error("Failed to fetch posts:", error);
+      console.error("Failed to fetch posts:", error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchPosts();
-  }, [activeTab]); // Depend on activeTab to refetch data
+    fetchPosts()
+  }, [activeTab]) // Depend on activeTab to refetch data
 
   // Column definitions with updated action handlers
   const columns: ColumnDef<Post>[] = [
@@ -85,28 +87,28 @@ export default function PostsPage() {
         const handleApprove = async () => {
           try {
             // Add approve logic here
-            const res = await apiRequest(`posts/approvePost/${post.id}`, "PUT");
-            console.log(res);
-            console.log("Approve post:", post.id);
-            
+            const res = await apiRequest(`posts/approvePost/${post.id}`, "PUT")
+            console.log(res)
+            console.log("Approve post:", post.id)
+
             // Refresh the posts list after approval
-            fetchPosts();
+            fetchPosts()
           } catch (error) {
-            console.error("Failed to approve post:", error);
+            console.error("Failed to approve post:", error)
           }
         }
 
         const handleReject = async () => {
           try {
             // Add reject logic here
-            const res = await apiRequest(`posts/rejectPost/${post.id}`, "PUT");
-            console.log(res);
-            console.log("Reject post:", post.id);
-            
+            const res = await apiRequest(`posts/rejectPost/${post.id}`, "PUT")
+            console.log(res)
+            console.log("Reject post:", post.id)
+
             // Refresh the posts list after rejection
-            fetchPosts();
+            fetchPosts()
           } catch (error) {
-            console.error("Failed to reject post:", error);
+            console.error("Failed to reject post:", error)
           }
         }
 
@@ -129,15 +131,17 @@ export default function PostsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem onClick={() => setSelectedPost(post)}>
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   className="text-red-600"
                   onClick={async () => {
                     try {
-                      await apiRequest(`posts/deletePost/${post.id}`, "DELETE");
-                      fetchPosts(); // Refresh after deletion
+                      await apiRequest(`posts/deletePost/${post.id}`, "DELETE")
+                      fetchPosts() // Refresh after deletion
                     } catch (error) {
-                      console.error("Failed to delete post:", error);
+                      console.error("Failed to delete post:", error)
                     }
                   }}
                 >
@@ -243,6 +247,11 @@ export default function PostsPage() {
           </Button>
         </div>
       </div>
+      <PostDetailsDialog 
+        post={selectedPost}
+        open={!!selectedPost}
+        onOpenChange={(open) => !open && setSelectedPost(null)}
+      />
     </Layout>
   )
 }
