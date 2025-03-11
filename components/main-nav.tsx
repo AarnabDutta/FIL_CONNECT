@@ -64,7 +64,8 @@ export function MainNav() {
           <Button
             asChild
             variant={pathname === navItem.href ? "default" : "ghost"}
-            className="w-full justify-start gap-3 transition-colors duration-200 ease-in-out hover:bg-accent text-base font-medium"
+            className={`w-full justify-start gap-3 transition-colors duration-200 ease-in-out text-base font-medium
+              ${pathname === navItem.href ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'hover:bg-accent'}`}
           >
             <Link href={navItem.href} className="flex items-center">
               <navItem.icon className="h-5 w-5 mr-2" />
